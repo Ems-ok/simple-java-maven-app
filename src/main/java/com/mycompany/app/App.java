@@ -4,7 +4,7 @@ package com.mycompany.app;
  * Hello world!
  */
 public class App {
-
+//This is a comment for a jenkins pipeline test
     private static final String MESSAGE = "Hello World!";
 
     public App() {}
