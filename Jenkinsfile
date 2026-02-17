@@ -4,7 +4,6 @@ pipeline {
     environment {
         GITHUB_TOKEN = credentials('github-token')
     }
-
   tools {
     maven 'Maven 3.9.12'
   }
@@ -14,7 +13,8 @@ pipeline {
         defaultValue: false,
         description: 'Run Selenium UI tests'
     )
-}    stages {
+}    
+    stages {
   stage('Secure Step') {
        steps { 
           bat 'echo "Token length is %GITHUB_TOKEN%'
