@@ -16,10 +16,5 @@ public class App {
     public String getMessage() {
         return MESSAGE;
     }
-
-    public void call(){
-       System.out.println("Call");
-    }
-
    
 }
