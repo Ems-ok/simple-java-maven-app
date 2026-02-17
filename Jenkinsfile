@@ -2,6 +2,7 @@ pipeline {
   agent any
 
   tools {
+    jdk 'JDK17'
     maven 'Maven 3.9.12'
   }
 
@@ -32,6 +33,7 @@ pipeline {
 
     stage('Build and Test') {
       steps {
+        bat 'java -version'
         bat 'mvn -v'
         bat 'mvn clean test package'
       }
