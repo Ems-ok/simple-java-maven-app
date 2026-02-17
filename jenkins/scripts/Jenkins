@@ -16,7 +16,7 @@ pipeline {
     )
 }    stages {
   stage('Secure Step') {
-       steps {
+       steps { 
           bat 'echo "Token length is %GITHUB_TOKEN%'
       }
     stage('Checkout') {
