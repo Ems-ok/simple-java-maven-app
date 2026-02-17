@@ -30,7 +30,6 @@ stages {
         bat 'mvn clean test package'
       }
     }
-  }
   stage('UI Tests (Selenium)') {
     when {
         expression { return params.RUN_UI_TESTS }
