@@ -14,11 +14,12 @@ pipeline {
         description: 'Run Selenium UI tests'
     )
 }    
-    stages {
+stages {
   stage('Secure Step') {
        steps { 
           bat 'echo "Token length is %GITHUB_TOKEN%'
       }
+  }
     stage('Checkout') {
       steps { checkout scm }
     }
