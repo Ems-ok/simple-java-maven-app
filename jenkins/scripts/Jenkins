@@ -4,7 +4,13 @@ pipeline {
   tools {
     maven 'Maven 3.9.12'
   }
-
+  parameters {
+    booleanParam(
+        name: 'RUN_UI_TESTS',
+        defaultValue: false,
+        description: 'Run Selenium UI tests'
+    )
+}
   stages {
     stage('Checkout') {
       steps { checkout scm }
@@ -17,10 +23,23 @@ pipeline {
       }
     }
   }
-      post {
-        always {
-            junit 'target/surefire-reports/*.xml'
-        }
+  stage('UI Tests (Selenium)') {
+    when {
+        expression { return params.RUN_UI_TESTS }
+    }
+    steps {
+        sh 'mvn -B verify -DskipUnitTests=true'
+    }
+}
+  post {
+    always {
+        junit allowEmptyResults: true, testResults: '''
+            target/surefire-reports/*.xml,
+            target/failsafe-reports/*.xml
+        '''
+    }
+}
+
     }
 }
 
