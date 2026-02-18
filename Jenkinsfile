@@ -40,16 +40,14 @@ pipeline {
       }
     }
 
-    stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('LocalSonar') {
-                    bat '''
-                     bat 'mvn sonar:sonar -Dsonar.projectKey=simple-java-maven-app'
+stage('SonarQube Analysis') {
+  steps {
+    withSonarQubeEnv('LocalSonar') {
+      bat 'mvn sonar:sonar -Dsonar.projectKey=simple-java-maven-app'
+    }
+  }
+}
 
-                    '''
-                }
-            }
-        }
 
         stage('Quality Gate') {
             steps {
