@@ -31,13 +31,33 @@ pipeline {
       }
     }
 
-    stage('Build and Test') {
+    stage('Build, Test & Coverage') {
       steps {
         bat 'java -version'
         bat 'mvn -v'
         bat 'mvn clean test package'
+        bat 'mvn clean verify'
       }
     }
+
+    stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('LocalSonar') {
+                    sh '''
+                      mvn sonar:sonar \
+                        -Dsonar.projectKey=simple-java-maven-app
+                    '''
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
 
     stage('UI Tests (Selenium)') {
       when {
