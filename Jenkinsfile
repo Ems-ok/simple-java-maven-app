@@ -44,8 +44,8 @@ pipeline {
             steps {
                 withSonarQubeEnv('LocalSonar') {
                     bat '''
-                      mvn sonar:sonar \
-                        -Dsonar.projectKey=simple-java-maven-app
+                     bat 'mvn sonar:sonar -Dsonar.projectKey=simple-java-maven-app'
+
                     '''
                 }
             }
