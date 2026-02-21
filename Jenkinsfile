@@ -7,6 +7,7 @@ pipeline {
   }
 
   environment {
+
     GITHUB_TOKEN = credentials('Github Credentials')
   }
 
@@ -21,7 +22,14 @@ pipeline {
   stages {
     stage('Secure Step') {
       steps {
-        sh 'if "%GITHUB_TOKEN%"=="" (echo TOKEN EMPTY) else (echo TOKEN SET)'
+        sh '''
+          if [ -z "$GITHUB_TOKEN" ]; then
+            echo "TOKEN EMPTY"
+            exit 1
+          else
+            echo "TOKEN SET"
+          fi
+        '''
       }
     }
 
@@ -35,39 +43,38 @@ pipeline {
       steps {
         sh 'java -version'
         sh 'mvn -v'
-        sh 'mvn clean test package'
-        sh 'mvn clean verify'
+        sh 'mvn -B clean verify'
       }
-       post {
-          always {
-            junit allowEmptyResults: true,
-                  testResults: 'target/surefire-reports/*.xml, target/failsafe-reports/*.xml'
-            publishHTML(target: [
-                  reportDir: 'target/site/jacoco',
-                  reportFiles: 'index.html',
-                  reportName: 'JaCoCo Code Coverage',
-                  keepAll: true,
-                  alwaysLinkToLastBuild: true
-            ])
+      post {
+        always {
+          junit allowEmptyResults: true,
+                testResults: 'target/surefire-reports/*.xml, target/failsafe-reports/*.xml'
 
-          }
-       }
+          publishHTML(target: [
+            reportDir: 'target/site/jacoco',
+            reportFiles: 'index.html',
+            reportName: 'JaCoCo Code Coverage',
+            keepAll: true,
+            alwaysLinkToLastBuild: true
+          ])
+        }
+      }
     }
 
     stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv('LocalSonar') {
-         sh 'mvn sonar:sonar -Dsonar.projectKey=simple-java-maven-app'
+          sh 'mvn -B sonar:sonar -Dsonar.projectKey=simple-java-maven-app'
         }
       }
     }
 
     stage('Quality Gate') {
-        steps {
-            timeout(time: 2, unit: 'MINUTES') {
-                waitForQualityGate abortPipeline: true
-            }
+      steps {
+        timeout(time: 2, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
         }
+      }
     }
 
     stage('UI Tests (Selenium)') {
@@ -77,13 +84,12 @@ pipeline {
       steps {
         sh 'mvn -B verify -DskipUnitTests=true'
       }
-        post {
-          always {
-            archiveArtifacts allowEmptyArchive: true,
-                  artifacts: 'target/*.jar, target/screenshots/**'
-          }
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true,
+                artifacts: 'target/*.jar, target/screenshots/**'
         }
+      }
     }
   }
-
 }
