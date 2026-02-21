@@ -48,7 +48,7 @@ pipeline {
                   reportName: 'JaCoCo Code Coverage',
                   keepAll: true,
                   alwaysLinkToLastBuild: true
-            )
+            ])
 
           }
        }
