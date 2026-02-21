@@ -7,7 +7,7 @@ pipeline {
   }
 
   environment {
-    GITHUB_TOKEN = credentials('github-token')
+    GITHUB_TOKEN = credentials('Github Credentials')
   }
 
   parameters {
@@ -21,7 +21,7 @@ pipeline {
   stages {
     stage('Secure Step') {
       steps {
-        bat 'if "%GITHUB_TOKEN%"=="" (echo TOKEN EMPTY) else (echo TOKEN SET)'
+        sh 'if "%GITHUB_TOKEN%"=="" (echo TOKEN EMPTY) else (echo TOKEN SET)'
       }
     }
 
@@ -33,56 +33,57 @@ pipeline {
 
     stage('Build, Test & Coverage') {
       steps {
-        bat 'java -version'
-        bat 'mvn -v'
-        bat 'mvn clean test package'
-        bat 'mvn clean verify'
+        sh 'java -version'
+        sh 'mvn -v'
+        sh 'mvn clean test package'
+        sh 'mvn clean verify'
+      }
+       post {
+          always {
+            junit allowEmptyResults: true,
+                  testResults: 'target/surefire-reports/*.xml, target/failsafe-reports/*.xml'
+            publishHTML(target: [
+                  reportDir: 'target/site/jacoco',
+                  reportFiles: 'index.html',
+                  reportName: 'JaCoCo Code Coverage',
+                  keepAll: true,
+                  alwaysLinkToLastBuild: true
+            )
+
+          }
+       }
+    }
+
+    stage('SonarQube Analysis') {
+      steps {
+        withSonarQubeEnv('LocalSonar') {
+         sh 'mvn sonar:sonar -Dsonar.projectKey=simple-java-maven-app'
+        }
       }
     }
 
-stage('SonarQube Analysis') {
-  steps {
-    withSonarQubeEnv('LocalSonar') {
-      bat 'mvn sonar:sonar -Dsonar.projectKey=simple-java-maven-app'
-    }
-  }
-}
-
-
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
+    stage('Quality Gate') {
+        steps {
+            timeout(time: 2, unit: 'MINUTES') {
+                waitForQualityGate abortPipeline: true
             }
         }
+    }
 
     stage('UI Tests (Selenium)') {
       when {
         expression { params.RUN_UI_TESTS }
       }
       steps {
-        bat 'mvn -B verify -DskipUnitTests=true'
+        sh 'mvn -B verify -DskipUnitTests=true'
       }
+        post {
+          always {
+            archiveArtifacts allowEmptyArchive: true,
+                  artifacts: 'target/*.jar, target/screenshots/**'
+          }
+        }
     }
   }
 
-  post {
-    always {
-      junit allowEmptyResults: true,
-            testResults: 'target/surefire-reports/*.xml, target/failsafe-reports/*.xml'
-
-      archiveArtifacts allowEmptyArchive: true,
-            artifacts: 'target/*.jar, target/screenshots/**'
-
-      publishHTML(target: [
-            reportDir: 'target/site/jacoco',
-            reportFiles: 'index.html',
-            reportName: 'JaCoCo Code Coverage',
-            keepAll: true,
-            alwaysLinkToLastBuild: true
-        ])
-
-    }
-  }
 }
