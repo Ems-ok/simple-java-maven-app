@@ -7,7 +7,6 @@ pipeline {
   }
 
   environment {
-
     GITHUB_TOKEN = credentials('Github Credentials')
   }
 
@@ -90,6 +89,22 @@ pipeline {
                 artifacts: 'target/*.jar, target/screenshots/**'
         }
       }
+    }
+  }
+  post {
+    failure {
+      emailext(
+        subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+        body: "Build failed.\nURL: ${env.BUILD_URL}",
+        to: "your.email@example.com"
+      )
+    }
+    unstable {
+      emailext(
+        subject: "UNSTABLE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+        body: "Build unstable (tests failing).\nURL: ${env.BUILD_URL}",
+        to: "your.email@example.com"
+      )
     }
   }
 }
