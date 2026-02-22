@@ -96,14 +96,14 @@ pipeline {
       emailext(
         subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
         body: "Build failed.\nURL: ${env.BUILD_URL}",
-        to: "your.email@example.com"
+        to: "emma.okeeffe.25@gmail.com"
       )
     }
     unstable {
       emailext(
         subject: "UNSTABLE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
         body: "Build unstable (tests failing).\nURL: ${env.BUILD_URL}",
-        to: "your.email@example.com"
+        to: "emma.okeeffe.25@gmail.com"
       )
     }
   }
